@@ -19,11 +19,12 @@ namespace Openhab.Proxy.Api.Configuration
         {
             private readonly Dictionary<Guid, (string token, string @group)> _tokenMap = new Dictionary<Guid, (string token, string @group)>
             {
-                {new Guid("d608bd60-66bd-4549-8db3-781cb678eb56"), (token:"NEIZ0",group: "G1")},
-                {new Guid("a4accbae-c9a1-41c1-bf50-c16ccf847dfe"), (token:"XT6M1",group: "G2")},
-                {new Guid("01c9e186-c1f1-4e94-8bf5-ad86b297d9ba"), (token:"B6QBJ",group:  "G3")},
-                {new Guid("680fbd1d-0b27-41c7-8981-17d657f9f440"), (token:"U43FR",group:  "G4")},
-                {new Guid("689cfd21-dc3d-451e-8dac-2c83193e3174"), (token:"U5DWT",group:  "G5")}
+                {new Guid("4285833b-753e-4c29-a38b-a280da6250fa"), (token: "dev", group: "master")},
+                {new Guid("d608bd60-66bd-4549-8db3-781cb678eb56"), (token: "NEIZ0", group: "G1")},
+                {new Guid("a4accbae-c9a1-41c1-bf50-c16ccf847dfe"), (token: "XT6M1", group: "G2")},
+                {new Guid("01c9e186-c1f1-4e94-8bf5-ad86b297d9ba"), (token: "B6QBJ", group: "G3")},
+                {new Guid("680fbd1d-0b27-41c7-8981-17d657f9f440"), (token: "U43FR", group: "G4")},
+                {new Guid("689cfd21-dc3d-451e-8dac-2c83193e3174"), (token: "U5DWT", group: "G5")}
             };
 
             public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
