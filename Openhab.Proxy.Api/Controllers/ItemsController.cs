@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Openhab.Client.Api;
-using Openhab.Client.Client;
 using Openhab.Client.Model;
 using Openhab.Proxy.Api.Configuration;
 
@@ -16,6 +14,7 @@ namespace Openhab.Proxy.Api.Controllers
     public class ItemsController : ControllerBase, ITokenController
     {
         private readonly IItemsApi _itemsApi;
+        public Guid Uuid { get; set; }
         public string Token { get; set; }
         public string Group { get; set; }
 

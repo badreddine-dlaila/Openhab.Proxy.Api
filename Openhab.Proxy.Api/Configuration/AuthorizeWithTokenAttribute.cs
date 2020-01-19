@@ -51,7 +51,7 @@ namespace Openhab.Proxy.Api.Configuration
                 }
 
                 var groupTag = _tokenMap[token];
-                ConfigureControllerWithToken(context, groupTag);
+                ConfigureControllerWithToken(context, token, groupTag);
                 await base.OnActionExecutionAsync(context, next);
 
             }
@@ -64,11 +64,13 @@ namespace Openhab.Proxy.Api.Configuration
                 };
             }
 
-            private static void ConfigureControllerWithToken(ActionExecutingContext context, (string token, string @group) tuple)
+            private static void ConfigureControllerWithToken(ActionExecutingContext context, Guid guid, (string token, string @group) tuple)
             {
-                context.HttpContext.Items.Add("Token", tuple.token);
-                ((ITokenController)context.Controller).Token = tuple.token;
-                ((ITokenController)context.Controller).Group = tuple.group;
+                var (token, @group) = tuple;
+                context.HttpContext.Items.Add("Token", token);
+                ((ITokenController)context.Controller).Uuid = guid;
+                ((ITokenController)context.Controller).Token = token;
+                ((ITokenController)context.Controller).Group = @group;
             }
         }
     }

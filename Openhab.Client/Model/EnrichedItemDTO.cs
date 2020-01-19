@@ -22,7 +22,7 @@ namespace Openhab.Client.Model
     /// EnrichedItemDTO
     /// </summary>
     [DataContract]
-    public partial class EnrichedItemDTO : IEquatable<EnrichedItemDTO>, IValidatableObject
+    public class EnrichedItemDTO : IEquatable<EnrichedItemDTO>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EnrichedItemDTO" /> class.
@@ -57,6 +57,12 @@ namespace Openhab.Client.Model
             // use default value if no "editable" provided
             //Editable = editable ?? false;
         }
+
+        /// <summary>
+        ///  Gets or Sets Members
+        /// </summary>
+        [DataMember(Name = "members", EmitDefaultValue = false)]
+        public IEnumerable<EnrichedItemDTO> Members { get; set; }
 
         /// <summary>
         /// Gets or Sets Type
