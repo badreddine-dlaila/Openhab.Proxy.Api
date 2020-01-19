@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Openhab.Client.Api;
-using Openhab.Client.Model;
 using Openhab.Proxy.Api.Configuration;
 using Openhab.Proxy.Api.Models;
 
@@ -14,7 +12,7 @@ namespace Openhab.Proxy.Api.Controllers
     [ApiController]
     [AuthorizeWithToken]
     [Route("api/[controller]")]
-    public class HomeController : ControllerBase, ITokenController
+    public class ConfigurationController : ControllerBase, ITokenController
     {
         private readonly IItemsApi _itemsApi;
         public Guid Uuid { get; set; }
@@ -24,7 +22,7 @@ namespace Openhab.Proxy.Api.Controllers
         private readonly Regex _zoneItemPattern = new Regex(@"(?<home>\w*)_(?<zone>\w*)");
         private readonly Regex _roomItemPattern = new Regex(@"(?<home>\w*)_(?<zone>\w*)_(?<room>\w*)?");
 
-        public HomeController(IItemsApi itemsApi)
+        public ConfigurationController(IItemsApi itemsApi)
         {
             _itemsApi = itemsApi;
         }
@@ -35,7 +33,7 @@ namespace Openhab.Proxy.Api.Controllers
         /// <remarks></remarks>
         /// <response code="202">Accepted</response>
         /// <response code="500">Internal server error</response>
-        [ProducesResponseType(typeof(IEnumerable<EnrichedItemDTO>), 200)]
+        [ProducesResponseType(typeof(HomeConfiguration), 200)]
         [ProducesResponseType(500)]
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -73,22 +71,8 @@ namespace Openhab.Proxy.Api.Controllers
                         })
                     })
                 })
-                //Rooms = rooms.Select(r => new
-                //{
-                //    Id = r.Name,
-                //    Name = _roomItemPattern.Match(r.Name).Groups["room"].Value,
-                //    Description = r.Label
-                //}),
-                //Devices = items.Select(i => new
-                //{
-                //    Id = i.Name,
-                //    Description = i.Label,
-                //    Room = ((dynamic)i.Metadata?["dialogflow"])?.config.room,
-                //    Zone = ((dynamic)i.Metadata?["dialogflow"])?.config.zone,
-                //    Type = ((dynamic)i.Metadata?["dialogflow"])?.config.type,
-                //    OpenhabType = i.Type
-                //})
             };
+
             return Ok(configuration);
         }
     }
