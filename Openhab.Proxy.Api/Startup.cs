@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Openhab.Client.Api;
 using Openhab.Client.Client;
+using Openhab.Proxy.Api.Configuration;
 
 namespace Openhab.Proxy.Api
 {
@@ -27,10 +28,14 @@ namespace Openhab.Proxy.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddMvcCore().AddNewtonsoftJson();
+            services.AddMvcCore(options => { options.InputFormatters.Insert(0, new RawRequestBodyFormatter()); }).AddNewtonsoftJson();
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Openhab Proxy API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Openhab Proxy API",
+                    Version = "v1",
+                });
                 options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
@@ -70,6 +75,10 @@ namespace Openhab.Proxy.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+
             }
 
             app.UseSwagger();

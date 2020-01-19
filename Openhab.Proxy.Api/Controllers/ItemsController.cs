@@ -12,7 +12,7 @@ namespace Openhab.Proxy.Api.Controllers
 {
     [ApiController]
     [AuthorizeWithToken]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ItemsController : ControllerBase, ITokenController
     {
         private readonly IItemsApi _itemsApi;
@@ -28,6 +28,7 @@ namespace Openhab.Proxy.Api.Controllers
         /// Get all available items.
         /// </summary>
         /// <remarks></remarks>
+        /// <response code="202">Accepted</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         /// <param name="type">item type filter</param>
@@ -53,6 +54,7 @@ namespace Openhab.Proxy.Api.Controllers
         /// Gets a single item.
         /// </summary>
         /// <remarks></remarks>
+        /// <response code="202">Accepted</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         /// <param name="name">item name</param>
@@ -72,6 +74,7 @@ namespace Openhab.Proxy.Api.Controllers
         /// Gets the state of an item.
         /// </summary>
         /// <remarks></remarks>
+        /// <response code="202">Accepted</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         /// <param name="name">item name</param>
@@ -90,11 +93,12 @@ namespace Openhab.Proxy.Api.Controllers
         /// Updates the state of an item.
         /// </summary>
         /// <remarks></remarks>
+        /// <response code="202">Accepted</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         /// <param name="name">item name</param>
         /// <param name="state">valid item state (e.g. ON, OFF, 0, 55)</param>
-        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(202)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [HttpPut]
@@ -102,23 +106,19 @@ namespace Openhab.Proxy.Api.Controllers
         public async Task<IActionResult> UpdateItemState(string name, [FromBody] string state)
         {
             var result = await _itemsApi.PutItemStateAsyncWithHttpInfo(name, state);
-            return new ContentResult
-            {
-                StatusCode = result.StatusCode,
-                Content = JsonConvert.SerializeObject(result.Data),
-                ContentType = "application/json"
-            };
+            return new StatusCodeResult(result.StatusCode);
         }
 
         /// <summary>
         /// Sends a command to an item
         /// </summary>
         /// <remarks></remarks>
+        /// <response code="202">Ok</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         /// <param name="name">item name</param>
         /// <param name="command">valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)</param>
-        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [HttpPost]
@@ -126,12 +126,7 @@ namespace Openhab.Proxy.Api.Controllers
         public async Task<IActionResult> SendCommand(string name, [FromBody] string command)
         {
             var result = await _itemsApi.PostItemCommandAsyncWithHttpInfo(name, command);
-            return new ContentResult
-            {
-                StatusCode = result.StatusCode,
-                Content = JsonConvert.SerializeObject(result.Data),
-                ContentType = "application/json"
-            };
+            return new StatusCodeResult(result.StatusCode);
         }
 
     }
