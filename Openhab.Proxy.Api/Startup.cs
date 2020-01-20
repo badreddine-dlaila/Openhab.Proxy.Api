@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -73,7 +74,9 @@ namespace Openhab.Proxy.Api
             });
 
             services.AddTransient<IItemsApi, ItemsApi>();
+
             services.AddApplicationInsightsTelemetry();
+            services.AddSingleton<ITelemetryInitializer, AppInsightsInitializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
