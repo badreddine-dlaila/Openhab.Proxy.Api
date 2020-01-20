@@ -95,6 +95,7 @@ namespace Openhab.Proxy.Api
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Openhab Proxy API");
+                options.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();
