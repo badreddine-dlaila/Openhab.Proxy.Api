@@ -19,7 +19,7 @@ namespace Openhab.Proxy.Api.Configuration
         {
             private readonly Dictionary<Guid, (string token, string @group)> _tokenMap = new Dictionary<Guid, (string token, string @group)>
             {
-                {new Guid("4285833b-753e-4c29-a38b-a280da6250fa"), (token: "dev", group: "master")},
+                {new Guid("4285833b-753e-4c29-a38b-a280da6250fa"), (token: "dev", group: "dev")},
                 {new Guid("d608bd60-66bd-4549-8db3-781cb678eb56"), (token: "NEIZ0", group: "G1")},
                 {new Guid("a4accbae-c9a1-41c1-bf50-c16ccf847dfe"), (token: "XT6M1", group: "G2")},
                 {new Guid("01c9e186-c1f1-4e94-8bf5-ad86b297d9ba"), (token: "B6QBJ", group: "G3")},
