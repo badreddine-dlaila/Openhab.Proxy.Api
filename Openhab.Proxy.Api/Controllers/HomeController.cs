@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Openhab.Client.Api;
 using Openhab.Proxy.Api.Configuration;
@@ -13,6 +11,7 @@ namespace Openhab.Proxy.Api.Controllers
 {
     [ApiController]
     [AuthorizeWithToken]
+    [Produces("application/json")]
     [Route("api/[controller]")]
     public class HomeController : ControllerBase, ITokenController
     {
@@ -20,9 +19,6 @@ namespace Openhab.Proxy.Api.Controllers
         public Guid Uuid { get; set; }
         public string Token { get; set; }
         public string Group { get; set; }
-
-        private readonly Regex _zoneItemPattern = new Regex(@"(?<home>\w*)_(?<zone>\w*)");
-        private readonly Regex _roomItemPattern = new Regex(@"(?<home>\w*)_(?<zone>\w*)_(?<room>\w*)?");
 
         public HomeController(IItemsApi itemsApi)
         {
@@ -41,11 +37,16 @@ namespace Openhab.Proxy.Api.Controllers
         public async Task<IActionResult> Get()
         {
             var openhabItems = await _itemsApi.GetItemsAsync(metadata: "dialogflow", tags: Token, recursive: true);
-            var rootGroup = openhabItems.Single(ohi => ohi.Tags.Contains("Building"));
-
-            var zones = openhabItems.Where(ohi => ohi.GroupNames.Count == 1 && ohi.GroupNames.Any(s => s == rootGroup.Name) && ohi.Type == "Group" && ohi.Metadata == null);
-            var rooms = openhabItems.Where(ohi => ohi.GroupNames.Count == 2 && ohi.GroupNames.Any(s => s == rootGroup.Name) && ohi.Type == "Group" && ohi.Metadata == null);
-            var devices = openhabItems.Where(i => ((dynamic)i.Metadata?["dialogflow"])?.config.zone != null && ((dynamic)i.Metadata?["dialogflow"])?.config.zone != "Internal").ToList();
+            var zones = openhabItems.Where(ohi => ohi.GroupNames.Count == 1
+                                                  && ohi.Type == "Group"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.zone != "Internal"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.room == null).ToList();
+            var rooms = openhabItems.Where(ohi => ohi.GroupNames.Count == 2
+                                                  && ohi.Type == "Group"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.zone != "Internal"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.type == null).ToList();
+            var devices = openhabItems.Where(i => ((dynamic)i.Metadata?["dialogflow"])?.config.zone != null
+                                                  && ((dynamic)i.Metadata?["dialogflow"])?.config.zone != "Internal").ToList();
 
             var configuration = new HomeConfiguration
             {
@@ -55,12 +56,12 @@ namespace Openhab.Proxy.Api.Controllers
                 Zones = zones.Select(z => new Zone
                 {
                     Id = z.Name,
-                    Name = _zoneItemPattern.Match(z.Name).Groups["zone"].Value,
+                    Name = ((dynamic)z.Metadata?["dialogflow"])?.config.zone,
                     Description = z.Label,
                     Rooms = rooms.Where(r => r.GroupNames.Contains(z.Name)).Select(r => new Room
                     {
                         Id = r.Name,
-                        Name = _roomItemPattern.Match(r.Name).Groups["room"].Value,
+                        Name = ((dynamic)r.Metadata?["dialogflow"])?.config.room,
                         Description = r.Label,
                         Devices = devices.Where(d => d.GroupNames.Contains(r.Name)).Select(d => new Device
                         {
@@ -91,15 +92,16 @@ namespace Openhab.Proxy.Api.Controllers
         public async Task<IActionResult> GetZones()
         {
             var openhabItems = await _itemsApi.GetItemsAsync(metadata: "dialogflow", tags: Token, recursive: true);
-            var rootGroup = openhabItems.Single(ohi => ohi.Tags.Contains("Building"));
-            var zoneItems = openhabItems.Where(ohi => ohi.GroupNames.Count == 1 && ohi.GroupNames.Any(s => s == rootGroup.Name) && ohi.Type == "Group" && ohi.Metadata == null);
+            var zones = openhabItems.Where(ohi => ohi.GroupNames.Count == 1
+                                                  && ohi.Type == "Group"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.zone != "Internal"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.room == null).ToList();
 
-
-            var rooms = zoneItems.Select(r => new Zone
+            var rooms = zones.Select(z => new Zone
             {
-                Id = r.Name,
-                Name = _zoneItemPattern.Match(r.Name).Groups["zone"].Value,
-                Description = r.Label
+                Id = z.Name,
+                Name = ((dynamic)z.Metadata?["dialogflow"])?.config.zone,
+                Description = z.Label
             });
 
             return Ok(rooms);
@@ -118,15 +120,16 @@ namespace Openhab.Proxy.Api.Controllers
         public async Task<IActionResult> GetRooms()
         {
             var openhabItems = await _itemsApi.GetItemsAsync(metadata: "dialogflow", tags: Token, recursive: true);
-            var rootGroup = openhabItems.Single(ohi => ohi.Tags.Contains("Building"));
-            var roomItems = openhabItems.Where(ohi => ohi.GroupNames.Count == 2 && ohi.GroupNames.Any(s => s == rootGroup.Name) && ohi.Type == "Group" && ohi.Metadata == null);
-
-            var rooms = roomItems.Select(r => new Room
-            {
-                Id = r.Name,
-                Name = _roomItemPattern.Match(r.Name).Groups["room"].Value,
-                Description = r.Label
-            });
+            var rooms = openhabItems.Where(ohi => ohi.GroupNames.Count == 2
+                                                  && ohi.Type == "Group"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.zone != "Internal"
+                                                  && ((dynamic)ohi.Metadata?["dialogflow"])?.config.type == null)
+                .Select(r => new Room
+                {
+                    Id = r.Name,
+                    Name = ((dynamic)r.Metadata?["dialogflow"])?.config.room,
+                    Description = r.Label
+                });
 
             return Ok(rooms);
         }
@@ -143,18 +146,18 @@ namespace Openhab.Proxy.Api.Controllers
         [Route("devices")]
         public async Task<IActionResult> GetDevices()
         {
-            var openhabItems = (await _itemsApi.GetItemsAsync(metadata: "dialogflow", tags: Token, recursive: true))
-                .Where(i => ((dynamic)i.Metadata?["dialogflow"])?.config.zone != null && ((dynamic)i.Metadata?["dialogflow"])?.config.zone != "Internal").ToList();
-
-            var devices = openhabItems.Select(d => new Device
-            {
-                Id = d.Name,
-                Description = d.Label,
-                Room = ((dynamic)d.Metadata?["dialogflow"])?.config.room,
-                Zone = ((dynamic)d.Metadata?["dialogflow"])?.config.zone,
-                Type = ((dynamic)d.Metadata?["dialogflow"])?.config.type,
-                OpenhabType = d.Type
-            });
+            var openhabItems = await _itemsApi.GetItemsAsync(metadata: "dialogflow", tags: Token, recursive: true);
+            var devices = openhabItems.Where(i => ((dynamic)i.Metadata?["dialogflow"])?.config.zone != null
+                                                  && ((dynamic)i.Metadata?["dialogflow"])?.config.zone != "Internal")
+                .Select(d => new Device
+                {
+                    Id = d.Name,
+                    Description = d.Label,
+                    Room = ((dynamic)d.Metadata?["dialogflow"])?.config.room,
+                    Zone = ((dynamic)d.Metadata?["dialogflow"])?.config.zone,
+                    Type = ((dynamic)d.Metadata?["dialogflow"])?.config.type,
+                    OpenhabType = d.Type
+                });
 
             return Ok(devices);
         }

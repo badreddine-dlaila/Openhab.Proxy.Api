@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Openhab.Client.Api;
 using Openhab.Client.Model;
 using Openhab.Proxy.Api.Configuration;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Openhab.Proxy.Api.Controllers
 {
     [ApiController]
     [AuthorizeWithToken]
+    [Produces("application/json")]
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase, ITokenController
     {
@@ -38,6 +40,7 @@ namespace Openhab.Proxy.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<EnrichedItemDTO>), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [SwaggerOperation(Tags = new[] { "Openhab Item API (Proxy)" })]
         [HttpGet]
         public async Task<IActionResult> Get(string type, string tags, string metadata, string fields, bool recursive = false)
         {
@@ -61,6 +64,7 @@ namespace Openhab.Proxy.Api.Controllers
         [ProducesResponseType(typeof(EnrichedItemDTO), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [SwaggerOperation(Tags = new[] { "Openhab Item API (Proxy)" })]
         [HttpGet]
         [Route("{name}")]
         public async Task<IActionResult> GetItemData(string name, string metadata)
@@ -80,6 +84,7 @@ namespace Openhab.Proxy.Api.Controllers
         [ProducesResponseType(typeof(string), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [SwaggerOperation(Tags = new[] { "Openhab Item API (Proxy)" })]
         [HttpGet]
         [Route("{name}/state")]
         public async Task<IActionResult> GetItemState(string name)
@@ -100,6 +105,7 @@ namespace Openhab.Proxy.Api.Controllers
         [ProducesResponseType(202)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [SwaggerOperation(Tags = new[] { "Openhab Item API (Proxy)" })]
         [HttpPut]
         [Route("{name}/state")]
         public async Task<IActionResult> UpdateItemState(string name, [FromBody] string state)
@@ -120,6 +126,7 @@ namespace Openhab.Proxy.Api.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [SwaggerOperation(Tags = new[] { "Openhab Item API (Proxy)" })]
         [HttpPost]
         [Route("{name}/state")]
         public async Task<IActionResult> SendCommand(string name, [FromBody] string command)
